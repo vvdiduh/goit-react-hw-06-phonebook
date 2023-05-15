@@ -40,7 +40,7 @@ const Form = ({ onSubmit, doubleContact }) => {
         />
       </label>
       <label className={styles.label}>
-        <span className={styles.span}>Номер</span>
+        <span className={styles.span}>Номер телефону</span>
         <input
           type="tel"
           name="number"

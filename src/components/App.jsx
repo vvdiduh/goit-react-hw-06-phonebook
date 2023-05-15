@@ -1,48 +1,53 @@
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import styles from './app.module.css';
 import Form from './Form/Form';
 import ContactList from './ContactList/ContactList';
 import Filter from './Filter/Filter';
 
-import { useSelector, useDispatch } from 'react-redux';
-import { setFilter } from '../redux/filter/filter-slice';
-import { addContact, deleteContact } from '../redux/contacts/contacts-slice';
-import {
-  getFilteredContacts,
-  getAllContacts,
-} from '../redux/contacts/contacts-selectors';
-import { getFilter } from 'redux/filter/filter-selectors';
-
 const App = () => {
-  const contacts = useSelector(getAllContacts);
-  const filteredContacts = useSelector(getFilteredContacts);
+  const [contacts, setContacts] = useState([]);
+  const [filteredContacts, setFilteredContacts] = useState([]);
+  const [filter, setFilter] = useState('');
 
-  const filter = useSelector(getFilter);
+  useEffect(() => {
+    const savedContacts = JSON.parse(localStorage.getItem('my-contacts'));
+    if (savedContacts) {
+      setContacts(savedContacts);
+    }
+  }, []);
 
-  const dispatch = useDispatch();
   useEffect(() => {
     localStorage.setItem('my-contacts', JSON.stringify(contacts));
   }, [contacts]);
 
   const onAddContact = ({ name, number }) => {
-    const action = addContact({ name, number });
-    dispatch(action);
+    const newContact = { name, number, id: contacts.length + 1 };
+    setContacts([...contacts, newContact]);
   };
 
   const handleChangeFilter = e => {
     const { value } = e.currentTarget;
-    dispatch(setFilter(value));
+    setFilter(value);
   };
 
   const doubleContact = name => {
-    return contacts.find(contact => contact.name.toLowerCase() === name);
+    return contacts.find(
+      contact => contact.name.toLowerCase() === name.toLowerCase()
+    );
   };
 
   const onDeleteContact = id => {
-    const action = deleteContact(id);
-    dispatch(action);
+    const updatedContacts = contacts.filter(contact => contact.id !== id);
+    setContacts(updatedContacts);
   };
+
+  useEffect(() => {
+    const filtered = contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    );
+    setFilteredContacts(filtered);
+  }, [contacts, filter]);
 
   return (
     <div className={styles.container}>
